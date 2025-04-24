@@ -1,5 +1,23 @@
 # GitOps-Automating-Web-App-Deployment-using-GitHub-Workflows-IaC
 
+### 🎯 Goal of this Project
+
+- 🔄 **End-to-End Automation**  
+  Automated deployment pipeline triggered from every code commit to production rollout.
+
+- 🔐 **Secure Credentials Management**  
+  Leveraging GitHub Secrets and AWS IAM for secure handling of sensitive data and access control.
+
+- 🛠️ **Infrastructure & Application as Code**  
+  Complete lifecycle management of both infrastructure and application through version-controlled code.
+
+- 🧪 **CI-Integrated Quality Gates**  
+  Static code analysis and quality enforcement integrated into the pipeline using **SonarCloud**.
+
+- 📈 **Scalable Cloud-Native Architecture**  
+  Deployed on **Amazon EKS** with **Helm charts** for robust, modular, and scalable orchestration.
+
+
 ## 📘 Overview
 
 In today’s cloud-native world, we needed a **robust, repeatable, and auditable way** to manage both infrastructure and applications. This project implements a **GitOps approach** using GitHub Actions to automate:
@@ -35,6 +53,7 @@ The goal is to remove manual intervention, reduce human errors, and embrace full
 ---
 
 ## 📐 Architecture
+
 
 ![image](https://github.com/user-attachments/assets/c4832c68-2fa8-4470-86bb-5b7c03fbda98)
 
