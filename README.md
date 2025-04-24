@@ -186,3 +186,108 @@ This markdown format is ready to be pasted into your `README.md` file for GitHub
 ---
 
 ## 🛠️ Setup and Configuration of - App deployment Workflow
+
+## Step 1: Create a SonarCloud Project
+
+1. Log in to [SonarCloud.io](https://sonarcloud.io) using your GitHub account.
+2. Create a new project and assign it a meaningful name.
+3. After creation, **note the project key** — this will be needed for later configuration.
+
+---
+
+## Step 2: Generate a SonarCloud Authentication Token
+
+1. Navigate to:  
+   `My Account` → `Security` → **Generate a Token**  
+   Name the token appropriately and copy it immediately.
+2. In your **GitHub repository**, go to:  
+   `Settings` → `Secrets and variables` → `Actions` → **New repository secret**
+3. Create a new secret to store the SonarCloud token.  
+   > Example Name: `SONAR_TOKEN`
+
+---
+
+## Step 3: Set Up a Quality Gate in SonarCloud
+
+1. Go to your **SonarCloud Organization**.
+2. Navigate to:  
+   `Quality Gates` → **Create** → Provide a name.
+3. Add a new condition:
+   - **Condition Type**: Overall Code
+   - **Metric**: Bugs
+   - **Threshold**: Greater than 50
+4. Associate this quality gate with your project.
+
+---
+
+## Step 4: Configure Additional Secrets in GitHub
+
+Create the following secrets in your GitHub repository:
+
+| Secret Name        | Description                          |
+|--------------------|--------------------------------------|
+| `SONAR_ORG`        | Your SonarCloud organization name    |
+| `SONAR_PROJECT_KEY`| The project key from SonarCloud      |
+| `SONAR_URL`        | The base URL (`https://sonarcloud.io`) |
+
+---
+
+## Step 5: Repository Structure
+
+Ensure your application development repository contains the following components:
+
+- `Dockerfile`: Builds a Java application using Maven and runs it on Tomcat.
+- `k8s/`: Contains Kubernetes deployment manifests and ingress configuration for the application domain (host).
+
+---
+
+## Step 6: GitHub Actions Workflow Setup
+
+1. Inside the root of your repository, create the following directory:
+   ```bash
+   mkdir -p .github/workflows
+2. Create a main.yml file, which is the workflow file for the application development.
+
+## `main.yml` Workflow Overview
+
+![image](https://github.com/user-attachments/assets/dd488b19-ba89-4424-b6a7-bebb5904a4e0)
+![image](https://github.com/user-attachments/assets/0c4b1863-ffc1-4bed-96bd-dad7466cc554)
+![image](https://github.com/user-attachments/assets/feea53c0-6a01-446e-b25a-a9f56266e7e6)
+
+
+
+The workflow includes two main stages:
+
+### 1. Code Analysis  
+This stage focuses on testing and analyzing the codebase using Maven and SonarCloud.
+
+**Key Steps:**
+- **Trigger:** Manually triggered using `workflow_dispatch`.
+- **Environment Variables:** Loaded securely via GitHub Secrets.
+- **Runner:** Utilizes `ubuntu-latest` for job execution.
+- **Steps include:**
+  - Code checkout.
+  - Running Maven tests and Checkstyle analysis.
+  - Installing Java 11.
+  - Configuring and authenticating with SonarCloud CLI.
+  - Uploading analysis results and enforcing quality gate conditions.
+
+---
+
+### 2. Docker Build & Push  
+After successful code analysis, this stage builds the Docker image and pushes it to AWS ECR.
+
+**Key Steps:**
+- This job is **dependent** on the previous testing job using the `needs` keyword.
+- Specifies the `ubuntu-latest` runner and checks out the code.
+- Uses the **predefined GitHub Action** `Docker ECR` for building and deploying the image.
+- Sets environment variables for:
+  - AWS CLI authentication.
+  - ECR registry and region configuration.
+- Tags the Docker image with:  
+  `latest.<GitHub build ID>`
+- Defines the Dockerfile path and build context.
+
+---
+
+This structured workflow ensures the code is thoroughly tested before being containerized and deployed, aligning with best practices in CI/CD pipelines.
