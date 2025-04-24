@@ -50,25 +50,23 @@ Finally, the Helm charts, which contain variables for the image name and tag, sp
 
 ## 🏗️Setup and Configuration of - Infrastructure Workflow
 
-### 🔧 Setup
+## 🔧 Setup
 
-# GitHub Repository Setup and Workflow Configuration
-
-## 1. Clone the GitHub Repositories
+### 1. Clone the GitHub Repositories
 Clone both the Infrastructure as Code (IaC) and Application Development code repositories to your local system.
 
-## 2. Create AWS Resources for IaC
+### 2. Create AWS Resources for IaC
 After cloning the repositories, create the required AWS resources for the IaC setup, including:
 - IAM User
 - Storage Account
 - Amazon ECR
 
-## 3. Create IAM User in AWS
+### 3. Create IAM User in AWS
 - In AWS, create an IAM user with administrator privileges (which can be adjusted to adhere to the principle of least privilege). Console access is not necessary.
 - Generate an Access Key for CLI access (Note: The Access Key should not be downloaded to avoid security risks, as it will be stored securely as a secret in GitHub).
 - Copy the Access Key and Access Key ID.
 
-## 4. Store AWS Secrets in GitHub
+### 4. Store AWS Secrets in GitHub
 - Navigate to the GitHub repository for the IaC code.
 - Go to **Settings → Secrets and variables → Actions → New repository secret**.
 - Create a new secret named `AWS_SECRET_ACCESS_KEY` and paste the Access Key value.
@@ -76,33 +74,33 @@ After cloning the repositories, create the required AWS resources for the IaC se
 
 Repeat the same steps for the Application Development code repository.
 
-## 5. Create S3 Bucket for Terraform State
+### 5. Create S3 Bucket for Terraform State
 - In AWS, create an S3 bucket to store Terraform state files. Ensure you note the region selected for the bucket
 - This ensures state consistency across teams and prevents race conditions during Terraform runs, which is crucial when multiple users are working on infrastructure.
 
-## 6. Store S3 Bucket Secrets in GitHub
+### 6. Store S3 Bucket Secrets in GitHub
 - In the IaC repository on GitHub, create a new secret variable to store the S3 bucket information. This secret will be used by Terraform to store state and run commands like `apply`, `test`, and `validate`.
 
-## 7. Create a Repository in Amazon ECR
+### 7. Create a Repository in Amazon ECR
 - In AWS, create a repository in Amazon ECR (ensure the region matches the one used for other resources).
 - Once the repository is created, copy the repository URI.
 - In the IaC GitHub repository, create a new secret with the repository URI value, ensuring to remove the repository name from the URI (i.e., exclude the part ending with `amazonaws.com`).
 
-## 8. Update Terraform Code in GitHub Repository
+### 8. Update Terraform Code in GitHub Repository
 - The IaC repository contains Terraform files for creating infrastructure in AWS, located in the `Terraform` folder. Key resources to create include the EKS Cluster and VPC.
 - The Terraform code also references the S3 bucket for storing state files.
 - Update the Terraform code in the GitHub repository to reflect necessary values (e.g., names, regions) that may vary depending on the resources being created. Ensure the updates are made in the **staging** branch.
 
-## 9. Configure GitHub Actions Workflows
+### 9. Configure GitHub Actions Workflows
 - In the locally cloned IaC repository (staging branch), navigate to the parent directory (where the `Terraform` folder is located).
 - Create a new folder named `.github/workflows` in this directory.
 - Workflow files in this folder, with a `.yml` extension, will define the GitHub Actions workflows.
 
 Each `.yml` file created in this folder will trigger a GitHub Actions workflow upon specific events in the repository.
 
-# Configuration: Terraform GitHub Actions Workflow
+## 🔧 Configuration: Terraform GitHub Actions Workflow
 
-## 1. Create `terraform.yml` in the `.github/workflows` directory and Define Trigger, Environment, Jobs, etc.
+### Create `terraform.yml` in the `.github/workflows` directory and Define Trigger, Environment, Jobs, etc.
 The workflow will be triggered under the following conditions:
 - Any changes made in the `Terraform` folder (which contains files like `vpc.yml`, `eks-cluster.yml`, etc.) will initiate the workflow.
 - The workflow will also trigger when there is a pull request to the `main` branch.
@@ -119,6 +117,8 @@ We define the working directory as `./terraform`, where all the resource creatio
 ### Steps in the Job
 The following tasks are defined as steps in the job:
 
+![image](https://github.com/user-attachments/assets/127cae35-a973-4f66-a715-bf0aaf0b1dd9)
+
 1. **Checkout the Code**
    - Even though the code exists in GitHub, it must be checked out into the runner.
 
@@ -133,21 +133,20 @@ The following tasks are defined as steps in the job:
    - This step will format and check the Terraform code. If an error is found, it will return a non-zero exit code and fail the workflow.
 
 5. **Terraform Validate**
-   - This step checks the syntax of the Terraform code.
-![image](https://github.com/user-attachments/assets/68df0e51-c079-4f2b-87b9-53bc4641b50f)
-
+   - This step checks the syntax of the Terraform code
 
 6. **Terraform Plan**
    - This step checks which resources need to be created or updated. The output of this command is stored in a `planfile`. This file is used in the `terraform apply` command to apply the changes.
    - The `continue-on-error: true` ensures the workflow reaches the end of the steps, allowing for a clean exit, even if errors occur.
    - The `Terraform plan status` step checks if there are any errors, and if so, it forces the runner to exit.
 
-![image](https://github.com/user-attachments/assets/4520e692-c3a9-465b-9dd3-7f5266d86e70)
+![image](https://github.com/user-attachments/assets/d09430ba-e611-4e8b-ab06-64209c2a8611)
+
 
 ### Testing the Workflow
 - You can test the workflow by making a dummy change in the `ecs.yml` (or any other file) in the `Terraform` folder and committing it. The workflow will not create any resources but will only run `terraform plan` and `terraform validate` to show the resources that will be created during `terraform apply`.
 
-## Apply Changes to AWS Infrastructure
+### Apply Changes to AWS Infrastructure
 Once the `terraform.yml` workflow file is in place, we can add the `terraform apply` commands to apply changes to the AWS infrastructure.
 
 1. **Terraform Apply Job**
@@ -163,7 +162,7 @@ Once the `terraform.yml` workflow file is in place, we can add the `terraform ap
 
 ![image](https://github.com/user-attachments/assets/86a0dad7-a54f-4685-b5c4-27e73ff4d030)
 
-## Merging Changes and Triggering the Workflow
+### Merging Changes and Triggering the Workflow
 The condition for applying the changes is if there is any change in the `main` branch of the IaC code repository. To trigger this workflow, merge the changes from the `staging` branch to the `main` branch.
 
 ### Set Branch Protection in GitHub
@@ -186,23 +185,4 @@ This markdown format is ready to be pasted into your `README.md` file for GitHub
 
 ---
 
-### 🛠️ GitHub Workflow: `.github/workflows/terraform.yml`
-
-```yaml
-on:
-  push:
-    branches: [ staging, main ]
-
-jobs:
-  terraform:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-      - run: terraform init
-      - run: terraform fmt -check
-      - run: terraform validate
-      - run: terraform plan -out=tfplan
-      - run: terraform apply -auto-approve tfplan
+## 🛠️ Setup and Configuration of - App deployment Workflow
