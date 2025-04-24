@@ -33,9 +33,8 @@ The goal is to remove manual intervention, reduce human errors, and embrace full
 
 1. [⚙️ Technology Stack](#️-technology-stack)
 2. [📐 Architecture](#-architecture)
-3. [🏗️ Infrastructure Workflow](#️-infrastructure-workflow)
-4. [📦 Application Workflow](#-application-workflow)
-5. [✅ Conclusion](#-conclusion)
+3. [🏗️ Infrastructure Workflow](#️-Configuration-terraform-gitHub-actions-workflow)
+4. [📦 Application Deployment Workflow](#-application-workflow)
 
 ---
 
@@ -204,9 +203,9 @@ This markdown format is ready to be pasted into your `README.md` file for GitHub
 
 ---
 
-## 🛠️ Setup and Configuration of - App deployment Workflow
+## 🏗️Setup and Configuration of - Application deployment Workflow
 
-## Step 1: Create a SonarCloud Project
+### Step 1: Create a SonarCloud Project
 
 1. Log in to [SonarCloud.io](https://sonarcloud.io) using your GitHub account.
 2. Create a new project and assign it a meaningful name.
@@ -214,7 +213,7 @@ This markdown format is ready to be pasted into your `README.md` file for GitHub
 
 ---
 
-## Step 2: Generate a SonarCloud Authentication Token
+### Step 2: Generate a SonarCloud Authentication Token
 
 1. Navigate to:  
    `My Account` → `Security` → **Generate a Token**  
@@ -226,7 +225,7 @@ This markdown format is ready to be pasted into your `README.md` file for GitHub
 
 ---
 
-## Step 3: Set Up a Quality Gate in SonarCloud
+### Step 3: Set Up a Quality Gate in SonarCloud
 
 1. Go to your **SonarCloud Organization**.
 2. Navigate to:  
@@ -239,7 +238,7 @@ This markdown format is ready to be pasted into your `README.md` file for GitHub
 
 ---
 
-## Step 4: Configure Additional Secrets in GitHub
+### Step 4: Configure Additional Secrets in GitHub
 
 Create the following secrets in your GitHub repository:
 
@@ -251,7 +250,7 @@ Create the following secrets in your GitHub repository:
 
 ---
 
-## Step 5: Repository Structure
+### Step 5: Repository Structure
 
 Ensure your application development repository contains the following components:
 
@@ -260,14 +259,14 @@ Ensure your application development repository contains the following components
 
 ---
 
-## Step 6: GitHub Actions Workflow Setup
+### Step 6: GitHub Actions Workflow Setup
 
 1. Inside the root of your repository, create the following directory:
    ```bash
    mkdir -p .github/workflows
 2. Create a main.yml file, which is the workflow file for the application development.
 
-## `main.yml` Workflow Overview
+### `main.yml` Workflow Overview
 
 ![image](https://github.com/user-attachments/assets/dd488b19-ba89-4424-b6a7-bebb5904a4e0)
 ![image](https://github.com/user-attachments/assets/0c4b1863-ffc1-4bed-96bd-dad7466cc554)
@@ -311,7 +310,7 @@ After successful code analysis, this stage builds the Docker image and pushes it
 
 After the workflow completes successfully, login to aws to verify that the Docker image has been pushed to AWS ECR.
 
-## Step 7: Deploy to EKS
+### Step 7: Deploy to EKS
 
 Now we will deploy the application to an Elastic Kubernetes Cluster in Amazon Web Services (AWS). The deployment process begins with configuring Helm charts to manage Kubernetes resources.
 
@@ -353,7 +352,7 @@ Next, update the `main.yml` file located in `.github/workflows` to configure the
 ![image](https://github.com/user-attachments/assets/9c1c4a25-b35c-461a-80e7-ea88cf9677cb)
 
 
-## Step 8: Validate the Deployment
+### Step 8: Validate the Deployment
 Once the GitHub workflow completes successfully, verify the deployment by following these steps:
 
 1. **Check the Ingress Load Balancer**  
