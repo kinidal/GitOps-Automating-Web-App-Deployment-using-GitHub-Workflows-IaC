@@ -290,4 +290,59 @@ After successful code analysis, this stage builds the Docker image and pushes it
 
 ---
 
-This structured workflow ensures the code is thoroughly tested before being containerized and deployed, aligning with best practices in CI/CD pipelines.
+After the workflow completes successfully, login to aws to verify that the Docker image has been pushed to AWS ECR.
+
+## Step 7: Deploy to EKS
+
+Now we will deploy the application to an Elastic Kubernetes Cluster in Amazon Web Services (AWS). The deployment process begins with configuring Helm charts to manage Kubernetes resources.
+
+### Configure Helm Charts
+To make the container image dynamic, we replace the hardcoded image name and tag in the Kubernetes definition file with a variable. This allows us to update the image each time the Kubernetes cluster is deployed. We use Helm charts to pass this variable value, which is dynamically set through the GitHub workflow.
+
+### Local Setup
+1. Install Helm on your local system where the GitHub code is checked out.
+2. Create a `helm` directory and initialize it with default files.
+3. Replace the default Kubernetes definition files with your project-specific files.
+4. In the `helm/{project-name}/templates` folder, modify the Kubernetes definition files. Specifically, replace the hardcoded image and tag with variables, which will be populated dynamically through the GitHub workflow.
+   
+   _Example:_
+   ```yaml
+   image:
+     repository: {{ .Values.image.repository }}
+     tag: {{ .Values.image.tag }}
+
+### Configure the GitHub Workflow
+Next, update the `main.yml` file located in `.github/workflows` to configure the deployment process:
+
+**Setup Deployment Job**  
+   Define a new job for deploying to the Kubernetes cluster. Specify a new runner and ensure that the job executes the deployment steps.
+
+   ![image](https://github.com/user-attachments/assets/f8396784-bee7-4f22-aea3-a8c863854c1c)
+
+**Checkout Code & Configure AWS Credentials**  
+   The workflow will first check out the code and configure AWS credentials. This is essential for using AWS CLI commands in the subsequent steps to interact with AWS resources.
+
+**Kubeconfig Setup**  
+   Retrieve the `kubeconfig` file, which is necessary for configuring `kubectl` to interact with the Kubernetes cluster. This file contains all the configuration needed to communicate with your cluster securely.
+
+**Login to ECR**  
+   Use the `kubectl` command to create a secret for logging into AWS Elastic Container Registry (ECR). This secret will use credentials stored in GitHub Secrets, such as the ECR registry URI, default ECR username, and a generated password, which will be securely retrieved during the workflow run and these values will be stored in the k8s secrets as well.
+
+**Run Helm Chart**  
+   After configuring the Kubernetes secrets, execute the Helm chart to deploy the application to your Kubernetes cluster. The values for the image (image name and tag) will be dynamically set via variables in the `values.yaml` file, ensuring that the latest image is used for deployment every time the workflow runs.
+
+![image](https://github.com/user-attachments/assets/9c1c4a25-b35c-461a-80e7-ea88cf9677cb)
+
+
+## Step 8: Validate the Deployment
+Once the GitHub workflow completes successfully, verify the deployment by following these steps:
+
+1. **Check the Ingress Load Balancer**  
+   Ensure that the load balancer is still running by accessing the ingress. This will help confirm that the service is exposed and the traffic is correctly routed to your application.
+
+2. **Test Application with Custom Domain**  
+   Update the DNS to point to a custom domain using a CNAME record. Verify that the application is accessible and functioning as expected when accessed through the custom domain.
+
+3. **Confirm EKS Deployment**  
+   If everything is working correctly, it means that the EKS cluster is pulling the latest image from ECR, and the application is running as a service through Kubernetes pods. This confirms the successful deployment and execution of your application in the cluster.
+
