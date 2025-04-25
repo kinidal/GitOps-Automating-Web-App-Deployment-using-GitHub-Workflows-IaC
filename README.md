@@ -1,4 +1,4 @@
-# GitOps-Automating-Web-App-Deployment-using-GitHub-Workflows-IaC
+# GitOps: Automating Web App Deployment using GitHub Workflows & IaC
 
 ### 🎯 Goal of this Project
 
